@@ -80,7 +80,7 @@ public class UserService {
 	}
 	
 	//指定されたキーワードを氏名またはフリガナに含むユーザーを、ページングされた状態で取得する
-	public Page<User> findUserByNameLikeOrFuriganaLike(String nameKeyword, String furiganaKeyword, Pageable pageable) {
+	public Page<User>findUsersByNameLikeOrFuriganaLike(String nameKeyword, String furiganaKeyword, Pageable pageable) {
 		return userRepository.findByNameLikeOrFuriganaLike("%" + nameKeyword + "%", "%" + furiganaKeyword + "%", pageable);
 	}
 	
