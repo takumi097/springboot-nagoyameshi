@@ -1,4 +1,4 @@
-package com.example.nagoyameshi.security;
+package com.example.nagoyameshi.service;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,7 +9,6 @@ import com.example.nagoyameshi.entity.Category;
 import com.example.nagoyameshi.entity.CategoryRestaurant;
 import com.example.nagoyameshi.entity.Restaurant;
 import com.example.nagoyameshi.repository.CategoryRestaurantRepository;
-import com.example.nagoyameshi.service.CategoryService;
 
 @Service
 public class CategoryRestaurantService {
