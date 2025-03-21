@@ -21,7 +21,7 @@ public class CategoryRestaurantService {
 	}
 	
 	//指定した店舗のカテゴリidをCategoryRestaurantエンティティのidが小さい順に並べ替えられた状態のリスト形式で取得
-	public List<CategoryRestaurant> findCategoryIdsByRestaurantOrderByIdAsc(Restaurant restaurant) {
+	public List<Integer> findCategoryIdsByRestaurantOrderByIdAsc(Restaurant restaurant) {
 		return categoryRestaurantRepository.findCategoryIdsByRestaurantOrderByIdAsc(restaurant);
 	}
 	
@@ -36,7 +36,7 @@ public class CategoryRestaurantService {
 					Category category = optionalCategory.get();	//カテゴリオブジェクトを取り出す
 					
 					//店舗とcategoryエンティティが紐づいたcategoryRestaurantエンティティを取得する
-					Optional<CategoryRestaurant> optionalCurrentCategoryRestaurant = categoryRestaurantRepository.findByCategoryAndRestaurant(restaurant, category);
+					Optional<CategoryRestaurant> optionalCurrentCategoryRestaurant = categoryRestaurantRepository.findByCategoryAndRestaurant(category, restaurant);
 					
 					//categoryRestaurantエンティティが存在しなければ新しく	categoryRestaurantを保存する
 					if (optionalCurrentCategoryRestaurant.isEmpty()) {		
@@ -52,7 +52,45 @@ public class CategoryRestaurantService {
 	}
 	
 	//フォームから送信されたカテゴリのidリストをもとに、category_restaurantsテーブルのデータを同期する
-	public void syncCategoriesRestaurants(List<Integer> categoryIds, Restaurant restaurant) {
+	public void syncCategoriesRestaurants(List<Integer> newCategoryIds, Restaurant restaurant) {
+		//登録されているrestaurantに紐づくカテゴリを取得
+		List<CategoryRestaurant> currentCategoriesRestaurants = categoryRestaurantRepository.findByRestaurantOrderByIdAsc(restaurant);
 		
+		//newCategoryIdsはフォームから送信された新しいカテゴリ
+		if (newCategoryIds == null) {		//フォームから送信されたカテゴリがnullの場合
+			for (CategoryRestaurant currentCategoryRestaurant : currentCategoriesRestaurants) {		//保存されていたカテゴリを取得
+				categoryRestaurantRepository.delete(currentCategoryRestaurant);		//カテゴリの関連をすべて削除
+			}
+		} else {		//フォームから送信されたカテゴリがnullではなく新しいカテゴリの場合
+			//保存されていたカテゴリを取得
+			for (CategoryRestaurant currentCategoryRestaurant : currentCategoriesRestaurants) {
+				//取り出したカテゴリが新しいカテゴリリストに含まれていないか検証
+				if (!newCategoryIds.contains(currentCategoryRestaurant.getCategory().getId())) {
+					//そのカテゴリの関連を削除する
+					categoryRestaurantRepository.delete(currentCategoryRestaurant);
+				}
+			}
+			
+			//フォームから送信されたカテゴリリストを
+			for (Integer newCategoryId : newCategoryIds) {
+				//新しく送信されたカテゴリをデータベースから取得
+				Optional<Category> optionalCategory = categoryService.findCategoryById(newCategoryId);
+				
+				if (optionalCategory.isPresent()) {
+					Category category = optionalCategory.get();
+					
+					//すでに登録されているか確認
+					Optional<CategoryRestaurant> optionalCurrentCategoryRestaurant = categoryRestaurantRepository.findByCategoryAndRestaurant(category, restaurant);
+					
+					if (optionalCurrentCategoryRestaurant.isEmpty()) {
+                        CategoryRestaurant categoryRestaurant = new CategoryRestaurant();
+                        categoryRestaurant.setRestaurant(restaurant);
+                        categoryRestaurant.setCategory(category);
+
+                        categoryRestaurantRepository.save(categoryRestaurant);
+					}
+				}
+			}
+		}
 	}
 }

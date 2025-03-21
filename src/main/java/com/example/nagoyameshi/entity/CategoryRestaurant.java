@@ -17,22 +17,22 @@ import lombok.Data;
 @Table(name = "category_restaurant")
 @Data
 public class CategoryRestaurant {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
-	private Integer id;
-	
-	@ManyToOne
-	@JoinColumn(name = "restaurant_id")
-	private Restaurant restaurant;
-	
-	@ManyToOne
-	@JoinColumn(name = "category_id")
-	private Category category;
-	
-	@Column(name = "created_at", insertable = false, updatable = false)
-	private Timestamp createdAt;
-	
-	@Column(name = "updated_at", insertable = false, updatable = false)
-	private Timestamp updatedAt;
+   @Id
+   @GeneratedValue(strategy = GenerationType.IDENTITY)
+   @Column(name = "id")
+   private Integer id;
+
+   @ManyToOne
+   @JoinColumn(name = "restaurant_id")
+   private Restaurant restaurant;
+
+   @ManyToOne
+   @JoinColumn(name = "category_id")
+   private Category category;
+
+   @Column(name = "created_at", insertable = false, updatable = false)
+   private Timestamp createdAt;
+
+   @Column(name = "updated_at", insertable = false, updatable = false)
+   private Timestamp updatedAt;
 }

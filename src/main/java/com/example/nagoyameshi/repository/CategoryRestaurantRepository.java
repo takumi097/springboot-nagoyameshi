@@ -14,13 +14,13 @@ import com.example.nagoyameshi.entity.Restaurant;
 public interface CategoryRestaurantRepository extends JpaRepository<CategoryRestaurant, Integer> {	
 
 	//指定した店舗のカテゴリのidを、CategoryRestaurantエンティティのidが小さい順に並べ替えられた状態のリスト形式で取得する
-	@Query("SELECT cr.category.id FORM Categoryrestaurant cr WHERE cr.restaurant = :restaurant ORDER BY cr.id ASC")
-	List<CategoryRestaurant> findCategoryIdsByRestaurantOrderByIdAsc(@Param("restaurant") Restaurant restaurant);
+	@Query("SELECT cr.category.id FROM CategoryRestaurant cr WHERE cr.restaurant = :restaurant ORDER BY cr.id ASC")
+	public List<Integer> findCategoryIdsByRestaurantOrderByIdAsc(@Param("restaurant") Restaurant restaurant);
 	
 	//指定した店舗とカテゴリが紐づいたCategoryRestaurantエンティティを取得する
-	public Optional<CategoryRestaurant> findByCategoryAndRestaurant(Restaurant restaurant, Category category);
+	public Optional<CategoryRestaurant> findByCategoryAndRestaurant(Category category, Restaurant restaurant);
 	
 	//指定した店舗に紐づくCategoryRestaurantエンティティを、idが小さい順に並べ替えられた状態のリスト形式で取得する
-	public List<CategoryRestaurant> findByRetaurantOrderByIdAsc(Restaurant restaurant);
+	public List<CategoryRestaurant> findByRestaurantOrderByIdAsc(Restaurant restaurant);
 	
 }

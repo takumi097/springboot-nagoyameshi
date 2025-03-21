@@ -1,6 +1,7 @@
 package com.example.nagoyameshi.controller;
 
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -20,18 +21,26 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.nagoyameshi.entity.Category;
 import com.example.nagoyameshi.entity.Restaurant;
 import com.example.nagoyameshi.form.RestaurantEditForm;
 import com.example.nagoyameshi.form.RestaurantRegisterForm;
+import com.example.nagoyameshi.service.CategoryRestaurantService;
+import com.example.nagoyameshi.service.CategoryService;
 import com.example.nagoyameshi.service.RestaurantService;
 
 @Controller
 @RequestMapping("/admin/restaurants")
 public class AdminRestaurantController {
 	private final RestaurantService restaurantService;
+	private final CategoryService categoryService;
+	private final CategoryRestaurantService categoryRestaurantService;
 	
-	public AdminRestaurantController(RestaurantService restaurantService) {
+	public AdminRestaurantController(RestaurantService restaurantService, CategoryService categoryService,
+									CategoryRestaurantService categoryRestaurantService) {
 		this.restaurantService = restaurantService;
+		this.categoryService = categoryService;
+		this.categoryRestaurantService = categoryRestaurantService;
 	}
 	
 	//店舗一覧ページ
@@ -78,7 +87,10 @@ public class AdminRestaurantController {
 	//店舗登録
 	@GetMapping("/register")
 	public String register(Model model) {
+		List<Category> categories = categoryService.findAllByCategories();
+		
 		model.addAttribute("restaurantRegisterForm", new RestaurantRegisterForm());
+		model.addAttribute("categories", categories);
 		
 		return "admin/restaurants/register";
 	}
@@ -114,7 +126,9 @@ public class AdminRestaurantController {
 			bindingResult.addError(closingTimeError);		}
 		
 		if (bindingResult.hasErrors()) {
+			List<Category> categories = categoryService.findAllByCategories();
 	           model.addAttribute("restaurantRegisterForm", restaurantRegisterForm);
+	           model.addAttribute("categories", categories);
 
 	           return "admin/restaurants/register";
 	       }
@@ -139,12 +153,17 @@ public class AdminRestaurantController {
 		}
 		
 		Restaurant restaurant = optionalRestaurant.get();
-		RestaurantEditForm restaurantEditForm = new RestaurantEditForm(restaurant.getName(), null, restaurant.getDescription(), restaurant.getLowestPrice(),
-																		restaurant.getHighestPrice(), restaurant.getPostalCode(), restaurant.getAddress(),
-																		restaurant.getOpeningTime(), restaurant.getClosingTime(), restaurant.getSeatingCapacity());
+		List<Integer> categoryIds = categoryRestaurantService.findCategoryIdsByRestaurantOrderByIdAsc(restaurant);
+		RestaurantEditForm restaurantEditForm = new RestaurantEditForm(restaurant.getName(), null, restaurant.getDescription(),
+																		restaurant.getLowestPrice(), restaurant.getHighestPrice(),
+																		restaurant.getPostalCode(), restaurant.getAddress(),
+																		restaurant.getOpeningTime(), restaurant.getClosingTime(),
+																		restaurant.getSeatingCapacity(), categoryIds);
 		
+		List<Category> categories = categoryService.findAllByCategories();
 		model.addAttribute("restaurant", restaurant);
 		model.addAttribute("restaurantEditForm", restaurantEditForm);
+		model.addAttribute("categories", categories);
 		
 		return "admin/restaurants/edit";
 	}
@@ -186,9 +205,11 @@ public class AdminRestaurantController {
 		Restaurant restaurant = optionalRestaurant.get();	
 		
 		if (bindingResult.hasErrors()) {
+			List<Category> categories = categoryService.findAllByCategories();
 	       model.addAttribute("restaurant", restaurant);
 	       model.addAttribute("restaurantEditForm", restaurantEditForm);
-
+	       model.addAttribute("categories", categories);
+	       
 	       return "admin/restaurants/edit";
 	    }
 		

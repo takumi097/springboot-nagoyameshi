@@ -11,7 +11,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 
@@ -65,7 +65,7 @@ public class Restaurant {
 	private Timestamp updatedAt;
 	
 	//Restaurantエンティティが削除されると、関連する中間テーブルのCategoryRestaurantエンティティを削除する
-	@ManyToMany(mappedBy = "restaurant", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
-	@OrderBy("id ASC")
-	private List<CategoryRestaurant> categoriesRestaurants;
+	@OneToMany(mappedBy = "restaurant", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @OrderBy("id ASC")
+    private List<CategoryRestaurant> categoriesRestaurants;    
 }

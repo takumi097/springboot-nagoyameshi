@@ -54,10 +54,11 @@ CREATE TABLE IF NOT EXISTS categories (
 
 CREATE TABLE IF NOT EXISTS category_restaurant (
 	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	restaurant_id INT NOT NULL UNIQUE,
-	category_id INT NOT NULL UNIQUE,
+	restaurant_id INT NOT NULL,
+	category_id INT NOT NULL,
 	created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	UNIQUE (restaurant_id, category_id),
 	FOREIGN KEY (restaurant_id) REFERENCES restaurants (id),
 	FOREIGN KEY (category_id) REFERENCES categories (id)
 );
