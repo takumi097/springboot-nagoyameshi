@@ -27,7 +27,7 @@ public class RegularHolidayRestaurantService {
 		return regularHolidayRestaurantRepository.findRegularHolidayIdsByRestaurant(restaurant);
 	}
 	
-	//フォームから送信された定休日idリストを毛戸にregular_holiday_restaurantテーブルにデータを登録する
+	//フォームから送信された定休日idリストを元にregular_holiday_restaurantテーブルにデータを登録する
 	@Transactional
 	public void createRegularHolidaysRestaurants(List<Integer> regularHolidayIds, Restaurant restaurant) {
 		
@@ -52,6 +52,7 @@ public class RegularHolidayRestaurantService {
 		}
 	}
 	
+	@Transactional
 	public void syncRegularHolidaysRestaurants(List<Integer> newRegularHolidayIds, Restaurant restaurant) {
 		List<RegularHolidayRestaurant> currentRegularHolidaysRestaurants = regularHolidayRestaurantRepository.findByRestaurant(restaurant);
 		
@@ -67,19 +68,21 @@ public class RegularHolidayRestaurantService {
 			}
 			
 			for (Integer newRegularHolidayId : newRegularHolidayIds) {
-				Optional<RegularHoliday> optionalRegularHoliday = regularHolidayService.findRegularHolidayById(newRegularHolidayId);
-				
-				if (optionalRegularHoliday.isPresent()) {
-					RegularHoliday regularHoliday = optionalRegularHoliday.get();
+				if (newRegularHolidayId != null) {
+					Optional<RegularHoliday> optionalRegularHoliday = regularHolidayService.findRegularHolidayById(newRegularHolidayId);
 					
-					Optional<RegularHolidayRestaurant> optionalCurrentRegularHolidayRestaurant = regularHolidayRestaurantRepository.findByRegularHolidayAndRestaurant(regularHoliday, restaurant);
-					
-					if (optionalCurrentRegularHolidayRestaurant.isEmpty()) {
-						RegularHolidayRestaurant regularHolidayRestaurant = new RegularHolidayRestaurant();
-						regularHolidayRestaurant.setRestaurant(restaurant);
-						regularHolidayRestaurant.setRegularHoliday(regularHoliday);
+					if (optionalRegularHoliday.isPresent()) {
+						RegularHoliday regularHoliday = optionalRegularHoliday.get();
 						
-						regularHolidayRestaurantRepository.save(regularHolidayRestaurant);
+						Optional<RegularHolidayRestaurant> optionalCurrentRegularHolidayRestaurant = regularHolidayRestaurantRepository.findByRegularHolidayAndRestaurant(regularHoliday, restaurant);
+						
+						if (optionalCurrentRegularHolidayRestaurant.isEmpty()) {
+							RegularHolidayRestaurant regularHolidayRestaurant = new RegularHolidayRestaurant();
+							regularHolidayRestaurant.setRestaurant(restaurant);
+							regularHolidayRestaurant.setRegularHoliday(regularHoliday);
+							
+							regularHolidayRestaurantRepository.save(regularHolidayRestaurant);
+						}
 					}
 				}
 			}

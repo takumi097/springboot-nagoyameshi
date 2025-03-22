@@ -59,12 +59,12 @@ public class RestaurantService {
 		}
 		
 		//店舗の登録
-		@Transactional
-		public void createRestaurant(RestaurantRegisterForm restaurantRegisterForm) {
-			Restaurant restaurant = new Restaurant();
-			MultipartFile imageFile = restaurantRegisterForm.getImageFile();
-			List<Integer> categoryIds = restaurantRegisterForm.getCategoryIds();
-			List<Integer> regularHolidayIds =restaurantRegisterForm.getRegularHolidayIds();
+		 @Transactional
+		 public void createRestaurant(RestaurantRegisterForm restaurantRegisterForm) {
+		    Restaurant restaurant = new Restaurant();
+		    MultipartFile imageFile = restaurantRegisterForm.getImageFile();
+		    List<Integer> categoryIds = restaurantRegisterForm.getCategoryIds();
+		    List<Integer> regularHolidayIds = restaurantRegisterForm.getRegularHolidayIds();
 			
 			//画像のファイル名
 			if (!imageFile.isEmpty()) {
@@ -75,24 +75,25 @@ public class RestaurantService {
 				restaurant.setImage(hashedImageName);
 			}
 			
+			restaurant.setName(restaurantRegisterForm.getName());
+	        restaurant.setDescription(restaurantRegisterForm.getDescription());
+	        restaurant.setLowestPrice(restaurantRegisterForm.getLowestPrice());
+	        restaurant.setHighestPrice(restaurantRegisterForm.getHighestPrice());
+	        restaurant.setPostalCode(restaurantRegisterForm.getPostalCode());
+	        restaurant.setAddress(restaurantRegisterForm.getAddress());
+	        restaurant.setOpeningTime(restaurantRegisterForm.getOpeningTime());
+	        restaurant.setClosingTime(restaurantRegisterForm.getClosingTime());
+	        restaurant.setSeatingCapacity(restaurantRegisterForm.getSeatingCapacity());
+			
+	        restaurantRepository.save(restaurant);
+			
 			if (categoryIds != null) {
 				categoryRestaurantService.createCategoriesRestaurants(categoryIds, restaurant);
 			}
 			
 			if (regularHolidayIds != null) {
-				regularHolidayRestaurantService.createRegularHolidaysRestaurants(regularHolidayIds, restaurant);			}
-			
-			restaurant.setName(restaurantRegisterForm.getName());
-			restaurant.setDescription(restaurantRegisterForm.getDescription());
-			restaurant.setLowestPrice(restaurantRegisterForm.getLowestPrice());
-			restaurant.setHighestPrice(restaurantRegisterForm.getHighestPrice());
-			restaurant.setPostalCode(restaurantRegisterForm.getPostalCode());
-			restaurant.setAddress(restaurantRegisterForm.getAddress());
-			restaurant.setOpeningTime(restaurantRegisterForm.getOpeningTime());
-			restaurant.setClosingTime(restaurantRegisterForm.getClosingTime());
-			restaurant.setSeatingCapacity(restaurantRegisterForm.getSeatingCapacity());
-			
-			restaurantRepository.save(restaurant);
+				regularHolidayRestaurantService.createRegularHolidaysRestaurants(regularHolidayIds, restaurant);
+			}
 		}
 		
 		//UUIDを使って生成したファイル名を返す

@@ -209,14 +209,16 @@ public class AdminRestaurantController {
 			FieldError lowestPriceError = new FieldError(bindingResult.getObjectName(), "lowestPrice", "最低価格は最高価格よりも低く設定してください。");
 			FieldError highestPriceError = new FieldError(bindingResult.getObjectName(), "highestPrice", "最高価格は最低価格よりも高く設定してください。");
 			bindingResult.addError(lowestPriceError);
-			bindingResult.addError(highestPriceError);		}
+			bindingResult.addError(highestPriceError);		
+		}
 				
 		//開店時間が閉店時間よりも前に設定しているか
 		if (openingTime != null && closingTime != null && !restaurantService.isValidBusinessHours(openingTime, closingTime)) {
 			FieldError openingTimeError = new FieldError(bindingResult.getObjectName(), "openingTime", "開店時間が閉店時間よりも前に設定してくいださい。");
 			FieldError closingTimeError = new FieldError(bindingResult.getObjectName(), "closingTime", "閉店時間は開店時間よりも後に設定してください。");
 			bindingResult.addError(openingTimeError);
-			bindingResult.addError(closingTimeError);		}
+			bindingResult.addError(closingTimeError);		
+		}
 		
 		Restaurant restaurant = optionalRestaurant.get();	
 		

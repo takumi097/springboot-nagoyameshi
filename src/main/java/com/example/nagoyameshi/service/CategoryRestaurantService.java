@@ -80,21 +80,23 @@ public class CategoryRestaurantService {
 			
 			//フォームから送信されたカテゴリリストを
 			for (Integer newCategoryId : newCategoryIds) {
-				//新しく送信されたカテゴリをデータベースから取得
-				Optional<Category> optionalCategory = categoryService.findCategoryById(newCategoryId);
+				if (newCategoryId != null) {
+					//新しく送信されたカテゴリをデータベースから取得
+					Optional<Category> optionalCategory = categoryService.findCategoryById(newCategoryId);
 				
-				if (optionalCategory.isPresent()) {
-					Category category = optionalCategory.get();
+					if (optionalCategory.isPresent()) {
+						Category category = optionalCategory.get();
 					
-					//すでに登録されているか確認
-					Optional<CategoryRestaurant> optionalCurrentCategoryRestaurant = categoryRestaurantRepository.findByCategoryAndRestaurant(category, restaurant);
+						//すでに登録されているか確認
+						Optional<CategoryRestaurant> optionalCurrentCategoryRestaurant = categoryRestaurantRepository.findByCategoryAndRestaurant(category, restaurant);
 					
-					if (optionalCurrentCategoryRestaurant.isEmpty()) {
-                        CategoryRestaurant categoryRestaurant = new CategoryRestaurant();
-                        categoryRestaurant.setRestaurant(restaurant);
-                        categoryRestaurant.setCategory(category);
+						if (optionalCurrentCategoryRestaurant.isEmpty()) {
+							CategoryRestaurant categoryRestaurant = new CategoryRestaurant();
+							categoryRestaurant.setRestaurant(restaurant);
+							categoryRestaurant.setCategory(category);
 
-                        categoryRestaurantRepository.save(categoryRestaurant);
+							categoryRestaurantRepository.save(categoryRestaurant);
+						}
 					}
 				}
 			}
