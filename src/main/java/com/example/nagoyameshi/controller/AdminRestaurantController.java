@@ -22,11 +22,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.nagoyameshi.entity.Category;
+import com.example.nagoyameshi.entity.RegularHoliday;
 import com.example.nagoyameshi.entity.Restaurant;
 import com.example.nagoyameshi.form.RestaurantEditForm;
 import com.example.nagoyameshi.form.RestaurantRegisterForm;
 import com.example.nagoyameshi.service.CategoryRestaurantService;
 import com.example.nagoyameshi.service.CategoryService;
+import com.example.nagoyameshi.service.RegularHolidayRestaurantService;
+import com.example.nagoyameshi.service.RegularHolidayService;
 import com.example.nagoyameshi.service.RestaurantService;
 
 @Controller
@@ -35,12 +38,18 @@ public class AdminRestaurantController {
 	private final RestaurantService restaurantService;
 	private final CategoryService categoryService;
 	private final CategoryRestaurantService categoryRestaurantService;
+	private final RegularHolidayRestaurantService regularHolidayRestaurantService;
+	private final RegularHolidayService regularHolidayService;
 	
 	public AdminRestaurantController(RestaurantService restaurantService, CategoryService categoryService,
-									CategoryRestaurantService categoryRestaurantService) {
+									CategoryRestaurantService categoryRestaurantService,
+									RegularHolidayRestaurantService regularHolidayRestaurantService,
+									RegularHolidayService regularHolidayService) {
 		this.restaurantService = restaurantService;
 		this.categoryService = categoryService;
 		this.categoryRestaurantService = categoryRestaurantService;
+		this.regularHolidayRestaurantService = regularHolidayRestaurantService;
+		this.regularHolidayService = regularHolidayService;
 	}
 	
 	//店舗一覧ページ
@@ -88,9 +97,11 @@ public class AdminRestaurantController {
 	@GetMapping("/register")
 	public String register(Model model) {
 		List<Category> categories = categoryService.findAllByCategories();
+		List<RegularHoliday> regularHolidays = regularHolidayService.findAllRegularHolidays();
 		
 		model.addAttribute("restaurantRegisterForm", new RestaurantRegisterForm());
 		model.addAttribute("categories", categories);
+		model.addAttribute("regularHolidays", regularHolidays);
 		
 		return "admin/restaurants/register";
 	}
@@ -127,8 +138,10 @@ public class AdminRestaurantController {
 		
 		if (bindingResult.hasErrors()) {
 			List<Category> categories = categoryService.findAllByCategories();
+			List<RegularHoliday> regularHolidays = regularHolidayService.findAllRegularHolidays();
 	           model.addAttribute("restaurantRegisterForm", restaurantRegisterForm);
 	           model.addAttribute("categories", categories);
+	           model.addAttribute("regularHolidays", regularHolidays);
 
 	           return "admin/restaurants/register";
 	       }
@@ -154,16 +167,19 @@ public class AdminRestaurantController {
 		
 		Restaurant restaurant = optionalRestaurant.get();
 		List<Integer> categoryIds = categoryRestaurantService.findCategoryIdsByRestaurantOrderByIdAsc(restaurant);
+		List<Integer> regularHolidayIds = regularHolidayRestaurantService.findRegularHolidayIdsByRestaurant(restaurant);
 		RestaurantEditForm restaurantEditForm = new RestaurantEditForm(restaurant.getName(), null, restaurant.getDescription(),
 																		restaurant.getLowestPrice(), restaurant.getHighestPrice(),
 																		restaurant.getPostalCode(), restaurant.getAddress(),
 																		restaurant.getOpeningTime(), restaurant.getClosingTime(),
-																		restaurant.getSeatingCapacity(), categoryIds);
+																		restaurant.getSeatingCapacity(), categoryIds, regularHolidayIds);
 		
 		List<Category> categories = categoryService.findAllByCategories();
+		List<RegularHoliday> regularHolidays = regularHolidayService.findAllRegularHolidays();
 		model.addAttribute("restaurant", restaurant);
 		model.addAttribute("restaurantEditForm", restaurantEditForm);
 		model.addAttribute("categories", categories);
+		model.addAttribute("regularHolidays", regularHolidays);
 		
 		return "admin/restaurants/edit";
 	}
@@ -206,9 +222,11 @@ public class AdminRestaurantController {
 		
 		if (bindingResult.hasErrors()) {
 			List<Category> categories = categoryService.findAllByCategories();
+			List<RegularHoliday> regularHolidays = regularHolidayService.findAllRegularHolidays();
 	       model.addAttribute("restaurant", restaurant);
 	       model.addAttribute("restaurantEditForm", restaurantEditForm);
 	       model.addAttribute("categories", categories);
+	       model.addAttribute("regularHolidays", regularHolidays);
 	       
 	       return "admin/restaurants/edit";
 	    }

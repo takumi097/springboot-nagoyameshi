@@ -45,9 +45,11 @@ public class RestaurantEditForm {
 	@NotNull(message = "閉店時間を選択してください。")
 	private LocalTime closingTime;
 	
-	@NotNull(message= "座席数を入力してください。")
+	@NotNull(message = "座席数を入力してください。")
 	@Min(value = 0, message = "座席数は0席以上に設定してください。")
 	private Integer seatingCapacity;
 	
 	private List<Integer> categoryIds;
+	
+	private List<Integer> regularHolidayIds;
 }

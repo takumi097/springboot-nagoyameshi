@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.nagoyameshi.entity.Category;
 import com.example.nagoyameshi.entity.CategoryRestaurant;
@@ -26,14 +27,19 @@ public class CategoryRestaurantService {
 	}
 	
 	//フォームから送信されたカテゴリのidリストをもとに、category_restaurantテーブルデータにでーたを登録する
+	@Transactional
 	public void createCategoriesRestaurants(List<Integer> categoryIds, Restaurant restaurant) {
-
-		for (Integer categoryId : categoryIds) {	//カテゴリのidのリストの要素数だけ繰り返し処理
-			if (categoryIds != null) {
-				Optional<Category> optionalCategory = categoryService.findCategoryById(categoryId);	//カテゴリidと一致するcategoryエンティティを取得
+		
+		//カテゴリのidのリストの要素数だけ繰り返し処理
+		for (Integer categoryId : categoryIds) {
+			if (categoryId != null) {
+				//カテゴリidと一致するcategoryエンティティを取得
+				Optional<Category> optionalCategory = categoryService.findCategoryById(categoryId);
 				
-				if (optionalCategory.isPresent()) {	//カテゴリエンティティが存在すれば
-					Category category = optionalCategory.get();	//カテゴリオブジェクトを取り出す
+				//カテゴリエンティティが存在すれば
+				if (optionalCategory.isPresent()) {
+					//カテゴリオブジェクトを取り出す
+					Category category = optionalCategory.get();
 					
 					//店舗とcategoryエンティティが紐づいたcategoryRestaurantエンティティを取得する
 					Optional<CategoryRestaurant> optionalCurrentCategoryRestaurant = categoryRestaurantRepository.findByCategoryAndRestaurant(category, restaurant);
@@ -52,6 +58,7 @@ public class CategoryRestaurantService {
 	}
 	
 	//フォームから送信されたカテゴリのidリストをもとに、category_restaurantsテーブルのデータを同期する
+	@Transactional
 	public void syncCategoriesRestaurants(List<Integer> newCategoryIds, Restaurant restaurant) {
 		//登録されているrestaurantに紐づくカテゴリを取得
 		List<CategoryRestaurant> currentCategoriesRestaurants = categoryRestaurantRepository.findByRestaurantOrderByIdAsc(restaurant);
