@@ -12,4 +12,7 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Integer>
 	
 	//id最も大きい店舗を取得する。最初の１件
 	public Restaurant findFirstByOrderByIdDesc();
+	
+	//すべての店舗を作成日時が新しい順に並べ替え、ページングされた状態で取得する
+	public Page<Restaurant> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }

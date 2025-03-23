@@ -58,6 +58,11 @@ public class RestaurantService {
 			return restaurantRepository.findFirstByOrderByIdDesc();
 		}
 		
+		//すべての店舗を作成日時が新しい順に並べ替え、ページングされた状態で取得
+		public Page<Restaurant> findAllRestaurantsByOrderByCreatedAtDesc(Pageable pageable) {
+			return restaurantRepository.findAllByOrderByCreatedAtDesc(pageable);
+		}
+		
 		//店舗の登録
 		 @Transactional
 		 public void createRestaurant(RestaurantRegisterForm restaurantRegisterForm) {

@@ -49,6 +49,11 @@ public class CategoryService {
 		return categoryRepository.findAll();
 	}
 	
+	//指定したカテゴリ名を持つ最初のカテゴリを取得する
+	public Category findFirstCategoryByName(String name) {
+		return categoryRepository.findFirstByName(name);
+	}
+	
 	//フォームから送信されたカテゴリ情報をデータベースに登録する
 	@Transactional
 	public void createCategory(CategoryRegisterForm categoryRegisterForm) {

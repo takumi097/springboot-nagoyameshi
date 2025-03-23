@@ -13,4 +13,7 @@ public interface CategoryRepository extends JpaRepository<Category, Integer>{
 	
 	//idが最も大きいカテゴリを取得する
 	public Category findFirstByOrderByIdDesc();
+	
+	//指定したカテゴリ名を持つ最初のカテゴリを取得する
+	public Category findFirstByName(String name); 
 }
