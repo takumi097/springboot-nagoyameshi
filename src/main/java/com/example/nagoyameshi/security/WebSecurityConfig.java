@@ -21,6 +21,8 @@ public class WebSecurityConfig {
 					.requestMatchers("/css/**", "/images/**", "/js/**", "/storage/**", "/", "/signup/**").permitAll()
 					 // 管理者にのみアクセスを許可するURL
 					.requestMatchers("/admin/**").hasRole("ADMIN") 
+					//未ログインユーザー、無料会員、有料会員がアクセスを許可URL
+					.requestMatchers("/restaurants/**").hasAnyRole("ANONYMOUS", "FREE_MEMBER", "PAID_MEMBER")
 					//上記以外のURLはログインが必要（会員または管理者のどちらでもOK）
 					.anyRequest().authenticated()
 					)
