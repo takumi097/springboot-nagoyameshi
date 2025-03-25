@@ -1,6 +1,7 @@
 package com.example.nagoyameshi.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,8 +10,10 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.nagoyameshi.entity.Category;
 import com.example.nagoyameshi.entity.Restaurant;
@@ -73,5 +76,21 @@ public class RestaurantController {
 		model.addAttribute("order", order);
 		
 		return "restaurants/index";
+	}
+	
+	@GetMapping("/{id}")
+	public String show(@PathVariable(name = "id") Integer id, RedirectAttributes redirectAttributes, Model model) {
+		Optional<Restaurant> optionalRestaurant = restaurantService.findRestaurantById(id);
+		
+		if (optionalRestaurant.isEmpty()) {
+			redirectAttributes.addFlashAttribute("errorMessage", "店舗が存在しません。");
+			
+			return "redirect://restaurants";
+		}
+		
+		Restaurant restaurant = optionalRestaurant.get();
+		model.addAttribute("restaurant", restaurant);
+		
+		return "restaurants/show";
 	}
 }
