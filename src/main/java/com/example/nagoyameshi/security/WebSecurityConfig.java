@@ -27,6 +27,8 @@ public class WebSecurityConfig {
 					.requestMatchers("/subscription/register", "/subscription/create").hasRole("FREE_MEMBER")
 					//有料会員のみアクセス許可するURL
 					.requestMatchers("/subscription/edit", "/subscription/update", "/subscription/cancel", "/subscription/delete").hasRole("PAID_MEMBER")
+					//無料会員、有料会員のみアクセス許可URL
+					.requestMatchers("restaurants/{restaurantId}/reviews/**").hasAnyRole("FREE_MEMBER", "PAID_MEMBER")
 					//上記以外のURLはログインが必要（会員または管理者のどちらでもOK）
 					.anyRequest().authenticated()
 					)

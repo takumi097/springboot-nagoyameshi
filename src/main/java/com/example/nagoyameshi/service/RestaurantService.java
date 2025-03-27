@@ -212,4 +212,28 @@ public class RestaurantService {
 		public boolean isValidBusinessHours(LocalTime openingTime, LocalTime closingTime) {
 			return closingTime.isAfter(openingTime);
 		}
+		
+		//すべての店舗を平均評価が高い順に並べ替え、ページングされた状態で取得する
+		public Page<Restaurant> findAllRestaurantByOrderByAverageScoreDesc(Pageable pageable) {
+			return restaurantRepository.findAllByOrderByAverageScoreDesc(pageable);
+		}
+		
+		//指定されたキーワードを店舗名または住所またはカテゴリ名に含む店舗を平均評価が高い順に並べ替え、ページングされた状態で取得する
+		public Page<Restaurant> findRestaurantByNameLikeOrAddressLikeOrCategoryNameLikeOrderByAverageScoreDesc(String nameKeyword, 
+																												String addressKeyword, 
+																												String categoryNameKeyword, 
+																												Pageable pageable) 
+		{
+			return restaurantRepository.findByNameLikeOrAddressLikeOrCategoryNameLikeOrderByAverageScoreDesc(nameKeyword, addressKeyword, categoryNameKeyword, pageable);
+		}
+		
+		//指定されたidのカテゴリが設定された連保を平均評価が高い順に並べ替え、ページングされた状態で取得する
+		public Page<Restaurant> findRestaurantByCategoryIdOrderByAverageScoreDesc(Integer categoryId, Pageable pageable) {
+			return restaurantRepository.findByCategoryIdOrderByAverageScoreDesc(categoryId, pageable);
+		}
+		
+		//指定された最低価格以下の店舗を平均評価が高い順に並べ替え、ページングされた状態で取得する
+		public Page<Restaurant> findRestaurantByLowestPriceLessThanEqualOrderByAverageScoreDesc(Integer price, Pageable pageable) {
+			return restaurantRepository.findByLowestPriceLessThanEqualOrderByAverageScoreDesc(price, pageable);
+		}
 }

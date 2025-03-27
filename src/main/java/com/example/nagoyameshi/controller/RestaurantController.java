@@ -45,24 +45,32 @@ public class RestaurantController {
 		if (keyword != null && !keyword.isEmpty()) {
 			if (order != null && order.equals("lowestPriceAsc")) {
 				restaurantPage = restaurantService.findRestaurantByNameLikeOrAddressLikeOrCategoryNameLikeOrderByLowestPriceAsc(keyword, keyword, keyword, pageable);
+			} else if (order != null && order.equals("ratingDesc")) {
+				restaurantPage = restaurantService.findRestaurantByNameLikeOrAddressLikeOrCategoryNameLikeOrderByAverageScoreDesc(keyword, keyword, keyword, pageable);
 			} else {
 				restaurantPage = restaurantService.findRestaurantByNameLikeOrAddressLikeOrCategoryNameLikeOrderByCreatedAtDesc(keyword, keyword, keyword, pageable);
 			}
 		} else if (categoryId != null) {
 			if (order != null && order.equals("lowestPriceAsc")) {
 				restaurantPage = restaurantService.findRestaurantByCategoryIdOrderByLowestPriceAsc(categoryId, pageable);
+			} else if (order != null && order.equals("ratingDesc")) {
+				restaurantPage = restaurantService.findRestaurantByCategoryIdOrderByAverageScoreDesc(categoryId, pageable);
 			} else {
 				restaurantPage = restaurantService.findRestaurantByCategoryIdOrderByCreatedAtDesc(categoryId, pageable);
 				}
 		} else if (price != null) {
 			if (order != null && order.equals("lowestPriceASC")) {
 				restaurantPage = restaurantService.findRestaurantByLowestPriceLessThanEqualOrderByLowestPriceAsc(price, pageable);
+			} else if (order != null && order.equals("ratingDesc")) {
+				restaurantPage = restaurantService.findRestaurantByLowestPriceLessThanEqualOrderByAverageScoreDesc(price, pageable);
 			} else {
 				restaurantPage = restaurantService.findRestaurantByLowestPriceLessThanEqualOrderByCreatedAtDesc(price, pageable);
 			}
 		} else {
 			if (order != null && !order.equals("lowestPriceASC")) {
 				restaurantPage = restaurantService.findAllRestaurantByOrderByLowestPriceAsc(pageable);
+			} else if (order != null && order.equals("ratingDesc")) {
+				restaurantPage = restaurantService.findAllRestaurantByOrderByAverageScoreDesc(pageable);
 			} else {
 				restaurantPage = restaurantService.findAllRestaurantsByOrderByCreatedAtDesc(pageable);
 			}

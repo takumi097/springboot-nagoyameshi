@@ -64,4 +64,39 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Integer>
 	
 	//指定された最低価格以下の店舗を最低価格が安い順に並べ替え、ページングされた状態で取得
 	public Page<Restaurant> findByLowestPriceLessThanEqualOrderByLowestPriceAsc(Integer price, Pageable pageable);
+	
+	//すべての店舗を平均評価が高い順に並べ替え、ページングされた状態で取得
+	@Query("SELECT r FROM Restaurant r LEFT JOIN r.reviews rv GROUP BY r.id ORDER BY AVG(rv.score) DESC")
+	public Page<Restaurant> findAllByOrderByAverageScoreDesc(Pageable pageable);
+	
+	//指定されたキーラードを店舗名または住所またはカテゴリ名に含む店舗を平均評価が高い順に並べ替え、ページングされた状態で取得する
+	@Query("SELECT r FROM Restaurant r " +
+			"LEFT JOIN r.categorysRestaurants cr " +
+			"LEFT JOIN r.Reviews rv " +
+			"WHERE r.name LIKE %:name% " +
+			"OR r.address LIKE %:address% " +
+			"OR cr.cateegory.name LIKE %:categoryName% " +
+			"GROUP BY r.id " +
+			"ORDER BY AVG(rv.score) DESC")
+	public Page<Restaurant> findByNameLikeOrAddressLikeOrCategoryNameLikeOrderByAverageScoreDesc(@Param("name") String nameKeyword,
+																								@Param("address") String addressKeyword,
+																								@Param("categoryName") String categoryNameKeyword,
+																								Pageable pageable);
+	
+	//指定されたidのカテゴリが設定された店舗を平均評価が高い順に並べ替え、ページングされた状態で取得する
+	@Query("SELECT r FROM Restaurant r " +
+			"LEFT JOIN r.categoriesRestaurants cr " +
+			"LEFT JOIN r.reviews rv " +
+			"WHERE cr.category.id = :categoryId " +
+			"GROUP BY r.id " +
+			"ORDER BY AVG(rv.score) DESC")
+	public Page<Restaurant> findByCategoryIdOrderByAverageScoreDesc(@Param("categoryId") Integer categoryId, Pageable pageable);
+	
+	//指定された最低価格以下の店舗を平均評価が高い順に並べ替え、ページングされた状態で取得する
+	@Query("SELECT r FROM Restaurant r " +
+			"LEFT JOIN r.reviews rv " +
+			"WHERE r.liwestPrice <= :price " +
+			"GROUP BY r.id " +
+			"ORDER BY AVG(rv.score) DESC")
+	public Page<Restaurant> findByLowestPriceLessThanEqualOrderByAverageScoreDesc(@Param("price") Integer price, Pageable pageable);
 }
