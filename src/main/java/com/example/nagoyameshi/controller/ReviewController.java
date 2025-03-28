@@ -217,6 +217,12 @@ public class ReviewController {
 						@ModelAttribute @Validated ReviewEditForm reviewEditForm, BindingResult bindingResult,
 						Model model) 
 	{
+		if (userDetailsImpl == null) {
+			redirectAttributes.addFlashAttribute("errorMessage", "ログインしてください。");
+			
+			return "redirect:http://localhost/login";
+		}
+		
 		Optional<Restaurant> optionalRestaurant = restaurantService.findRestaurantById(restaurantId);
 		Optional<Review> optionalReview = reviewService.findReviewById(reviewId);
 		
@@ -263,6 +269,12 @@ public class ReviewController {
 						@PathVariable(name = "reviewId") Integer reviewId, RedirectAttributes redirectAttributes,
 						@AuthenticationPrincipal UserDetailsImpl userDetailsImpl) 
 	{
+		if (userDetailsImpl == null) {
+			redirectAttributes.addFlashAttribute("errorMessage", "ログインしてください。");
+			
+			return "redirect:http://localhost/login";
+		}
+		
 		Optional<Restaurant> optionalRestaurant = restaurantService.findRestaurantById(restaurantId);
 		Optional<Review> optionalReview = reviewService.findReviewById(reviewId);
 		
@@ -271,7 +283,7 @@ public class ReviewController {
 		if (user.getRole().getName().equals("ROLE_FREE_MEMBER")) {
 			redirectAttributes.addFlashAttribute("subscriptionMessage", "この機能を利用するには有料プランへの登録が必要です。");
 			
-			return "redirect:/restaurants";
+			return "redirect:/subscription/register";
 		}
 		
 		if (optionalRestaurant.isEmpty() || optionalReview.isEmpty()) {

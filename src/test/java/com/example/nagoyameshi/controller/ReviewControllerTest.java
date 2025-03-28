@@ -5,6 +5,8 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -195,7 +197,157 @@ public class ReviewControllerTest {
 	@Test
 	@WithUserDetails("hanako.samurai@example.com")
 	public void 管理者としてログイン済みの場合はレビュー編集ページが表示されずに403エラーが発生する() throws Exception {
-		mockMvc.perform(get("/restaurants/2/revviews/1/edit"))
+		mockMvc.perform(get("/restaurants/2/reviews/1/edit"))
 				.andExpect(status().isForbidden());
+	}
+	
+	@Test
+	@Transactional
+	public void 未ログインの場合はレビューを更新せずにログインページにリダイレクトする() throws Exception {
+		mockMvc.perform(post("/restaurants/2/reviews/1/update")
+				.with(csrf())
+				.param("score", "5")
+				.param("content", "テストコメント"))
+		 		.andExpect(status().is3xxRedirection())
+		 		.andExpect(redirectedUrl("http://localhost/login"));
+		
+		Optional<Review> optionalReview = reviewService.findReviewById(1);
+		assertThat(optionalReview).isPresent();
+		Review review = optionalReview.get();
+		assertThat(review.getScore()).isEqualTo(3);
+		assertThat(review.getContent()).isEqualTo("名古屋では有名な格安で焼肉食べ放題のお店。タイミングよく仕事で行く機会があったので、地元の友人と一緒に来店しました。店内は広くゆったりとできます。");
+	}
+	
+	@Test
+	@WithUserDetails("taro.samurai@example.com")
+	@Transactional
+	public void 無料会員としてログイン済みの場合はレビューを更新せずに有料プラン登録ページにリダイレクトする() throws Exception {
+		mockMvc.perform(post("/restaurants/2/reviews/1/update")
+				.with(csrf())
+				.param("score", "5")
+				.param("content", "テストコメント"))
+				.andExpect(status().is3xxRedirection())
+				.andExpect(redirectedUrl("/subscription/register"));
+		
+		Optional<Review> optionalReview = reviewService.findReviewById(1);
+		assertThat(optionalReview).isPresent();
+		Review review = optionalReview.get();
+		assertThat(review.getScore()).isEqualTo(3);
+		assertThat(review.getContent()).isEqualTo("名古屋では有名な格安で焼肉食べ放題のお店。タイミングよく仕事で行く機会があったので、地元の友人と一緒に来店しました。店内は広くゆったりとできます。");
+	}
+	
+	@Test
+	@WithUserDetails("jiro.samurai@example.com")
+	@Transactional
+	public void 有料会員としてログイン済みの場合は自身のレビュー更新後に店舗詳細ページにリダイレクトする() throws Exception {
+		mockMvc.perform(post("/restaurants/2/reviews/1/update")
+				.with(csrf())
+				.param("score", "5")
+				.param("content", "テストコメント"))
+		 		.andExpect(status().is3xxRedirection())
+		 		.andExpect(redirectedUrl("/restaurants/2"));
+		Optional<Review> optionalReview = reviewService.findReviewById(1);
+		assertThat(optionalReview).isPresent();
+		Review review = optionalReview.get();
+		assertThat(review.getScore()).isEqualTo(5);
+		assertThat(review.getContent()).isEqualTo("テストコメント");
+	}
+	
+	@Test
+	@WithUserDetails("jiro.samurai@example.com")
+	@Transactional
+	public void 有料会員としてログイン済みの場合は他人のレビューを更新せずに店舗詳細ページにリダイレクトする() throws Exception {
+		mockMvc.perform(post("/restaurants/2/reviews/2/update")
+				.with(csrf())
+				.param("score", "5")
+				.param("content", "テストコメント"))
+		.andExpect(status().is3xxRedirection())
+		.andExpect(redirectedUrl("/restaurants/2"));
+		
+		Optional<Review> optionalReview = reviewService.findReviewById(1);
+		assertThat(optionalReview).isPresent();
+		Review review = optionalReview.get();
+		assertThat(review.getScore()).isEqualTo(3);
+		assertThat(review.getContent()).isEqualTo("名古屋では有名な格安で焼肉食べ放題のお店。タイミングよく仕事で行く機会があったので、地元の友人と一緒に来店しました。店内は広くゆったりとできます。");
+	}
+	
+	@Test
+	@WithUserDetails("hanako.samurai@example.com")
+	@Transactional
+	public void 管理者としてログイン済みの場合はレビューを更新せずに403エラーが発生する() throws Exception {
+		mockMvc.perform(post("/restaurants/2/reviews/1/update")
+				.with(csrf())
+				.param("score", "5")
+				.param("content", "テストコメント"))
+		.andExpect(status().isForbidden());
+		
+		Optional<Review> optionalReview = reviewService.findReviewById(1);
+		assertThat(optionalReview).isPresent();
+		Review review = optionalReview.get();
+		assertThat(review.getScore()).isEqualTo(3);
+		assertThat(review.getContent()).isEqualTo("名古屋では有名な格安で焼肉食べ放題のお店。タイミングよく仕事で行く機会があったので、地元の友人と一緒に来店しました。店内は広くゆったりとできます。");
+	}
+	
+	@Test
+	@Transactional
+	public void 未ログインの場合はレビューを削除せずにログインページにリダイレクトする() throws Exception {
+		mockMvc.perform(post("/restaurants/2/reviews/1/delete")
+				.with(csrf()))
+		.andExpect(status().is3xxRedirection())
+		.andExpect(redirectedUrl("http://localhost/login"));
+		
+		Optional<Review> optionalReview = reviewService.findReviewById(1);
+		assertThat(optionalReview).isPresent();
+	}
+	
+	@Test
+	@WithUserDetails("taro.samurai@example.com")
+	@Transactional
+	public void 無料会員としてログイン済みの場合はレビューを削除せずに有料プラン登録へリダイレクトする() throws Exception {
+		mockMvc.perform(post("/restaurants/2/reviews/1/delete")
+				.with(csrf()))
+		.andExpect(status().is3xxRedirection())
+		.andExpect(redirectedUrl("/subscription/register"));
+	
+		Optional<Review> optionalReview = reviewService.findReviewById(1);
+		assertThat(optionalReview).isPresent();
+	}
+	
+	@Test
+	@WithUserDetails("jiro.samurai@example.com")
+	@Transactional
+	public void 有料会員としてログイン済みの場合は自身のレビュー削除後に店舗詳細ページにリダイレクトする() throws Exception {
+		mockMvc.perform(post("/restaurants/2/reviews/1/delete")
+				.with(csrf()))
+		.andExpect(status().is3xxRedirection())
+		.andExpect(redirectedUrl("/restaurants/2"));
+		
+		Optional<Review> optionalReview = reviewService.findReviewById(1);
+		assertThat(optionalReview).isEmpty();
+	}
+	
+	@Test
+	@WithUserDetails("jiro.samurai@example.com")
+	@Transactional
+	public void 有料会員としてログイン済みの場合は他人のレビューを削除せずに店舗詳細ページにリダイレクトする() throws Exception {
+		mockMvc.perform(post("/restaurants/2/reviews/2/delete")
+				.with(csrf()))
+		.andExpect(status().is3xxRedirection())
+		.andExpect(redirectedUrl("/restaurants/2"));
+		
+		Optional<Review> optionalReview = reviewService.findReviewById(1);
+		assertThat(optionalReview).isPresent();
+	}
+	
+	@Test
+	@WithUserDetails("hanako.samurai@example.com")
+	@Transactional
+	public void 管理者としてログイン済みの場合はレビューを削除せずに403エラーが発生する() throws Exception {
+		mockMvc.perform(post("/restaurants/2/reviews/2/delete")
+				.with(csrf()))
+		.andExpect(status().isForbidden());
+		
+		Optional<Review> optionalReview = reviewService.findReviewById(1);
+		assertThat(optionalReview).isPresent();
 	}
 }
