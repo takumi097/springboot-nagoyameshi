@@ -28,7 +28,7 @@ public class ReviewService {
 	}
 	
 	//指定した店舗のすべてのレビューを作成日時が新しい順に並べ替え、ページングされた状態で取得
-	public Page<Review> findReviewByRestaurantOrderByCreatedAtDesc(Restaurant restaurant, Pageable pageable) {
+	public Page<Review> findReviewsByRestaurantOrderByCreatedAtDesc(Restaurant restaurant, Pageable pageable) {
 		return reviewRepository.findByRestaurantOrderByCreatedAtDesc(restaurant, pageable);
 	}
 	
@@ -38,7 +38,7 @@ public class ReviewService {
 	}
 	
 	//idが最も大きいレビューを取得する
-	public Review findFirstReviewByOrderByIdDesc() {
+	public Review findFirstReviewsByOrderByIdDesc() {
 		return reviewRepository.findFirstByOrderByIdDesc();
 	}
 	

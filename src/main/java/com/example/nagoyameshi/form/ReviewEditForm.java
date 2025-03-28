@@ -1,6 +1,7 @@
 package com.example.nagoyameshi.form;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
@@ -11,7 +12,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ReviewEditForm {
-	@NotBlank(message = "評価を選択してください。")
+	@NotNull(message = "評価を選択してください。")
 	@Range(min = 1, max = 5, message = "評価は1～5のいずれかを選択してください。")
 	private Integer score;
 	

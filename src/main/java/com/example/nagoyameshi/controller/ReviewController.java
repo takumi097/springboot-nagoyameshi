@@ -41,43 +41,58 @@ public class ReviewController {
 	
 	//レビュー一覧ページ
 	@GetMapping
-	public String index(@PathVariable(name = "restaurantId") Integer restaurantId,
-						@PageableDefault(page = 0, size = 5, sort = "id", direction = Direction.ASC) Pageable pageable,
-						RedirectAttributes redirectAttributes, Model model, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
-		Optional<Restaurant> optionalRestaurant = restaurantService.findRestaurantById(restaurantId);
+	   public String index(@PathVariable(name = "restaurantId") Integer restaurantId,
+	                       @PageableDefault(page = 0, size = 5, sort = "id", direction = Direction.ASC) Pageable pageable,
+	                       @AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
+	                       RedirectAttributes redirectAttributes,
+	                       Model model)
+	   {
 		
-		if (optionalRestaurant.isEmpty()) {
-			redirectAttributes.addFlashAttribute("errorMessage", "店舗が存在しません");
-			
-			return "redirect:/restaurants";
-		}
-		
-		Restaurant restaurant = optionalRestaurant.get();
-		User user = userDetailsImpl.getUser();
-		String userRoleName = user.getRole().getName();
-		
-		Page<Review> reviewPage;
-		
-		if (userRoleName.equals("ROLE_PAID_MEMBER")) {
-			reviewPage = reviewService.findReviewByRestaurantOrderByCreatedAtDesc(restaurant, pageable);
-		} else {
-			reviewPage = reviewService.findReviewByRestaurantOrderByCreatedAtDesc(restaurant, PageRequest.of(0, 3));
-		}
-		
-		boolean hasUserAlreadyReviewed = reviewService.hasUserAlreadyReviewed(restaurant, user);
-		
-		model.addAttribute("restaurant", restaurant);
-		model.addAttribute("userRoleName", userRoleName);
-		model.addAttribute("reviewPage", reviewPage);
-		model.addAttribute("hasUserAlreadyReviewed", hasUserAlreadyReviewed);
+			if (userDetailsImpl == null) {
+				redirectAttributes.addFlashAttribute("errorMessage", "ログインしてください。");
+				return "redirect:http://localhost/login";
+			}
 	
-		return "reviews/index";
-	}
+	       Optional<Restaurant> optionalRestaurant  = restaurantService.findRestaurantById(restaurantId);
+
+	       if (optionalRestaurant.isEmpty()) {
+	           redirectAttributes.addFlashAttribute("errorMessage", "店舗が存在しません。");
+
+	           return "redirect:/restaurants";
+	       }
+
+	       Restaurant restaurant = optionalRestaurant.get();
+	       User user = userDetailsImpl.getUser();
+	       String userRoleName = user.getRole().getName();
+	       Page<Review> reviewPage;
+
+	       if (userRoleName.equals("ROLE_PAID_MEMBER")) {
+	           reviewPage = reviewService.findReviewsByRestaurantOrderByCreatedAtDesc(restaurant, pageable);
+	       } else {
+	           reviewPage = reviewService.findReviewsByRestaurantOrderByCreatedAtDesc(restaurant, PageRequest.of(0, 3));
+	       }
+
+	       boolean hasUserAlreadyReviewed = reviewService.hasUserAlreadyReviewed(restaurant, user);
+
+	       model.addAttribute("restaurant", restaurant);
+	       model.addAttribute("userRoleName", userRoleName);
+	       model.addAttribute("reviewPage", reviewPage);
+	       model.addAttribute("hasUserAlreadyReviewed", hasUserAlreadyReviewed);
+
+	       return "reviews/index";
+	   }
 	
 	//レビュー投稿ページ
 	@GetMapping("/register")
 	public String register(@PathVariable(name = "restaurantId") Integer restaurantId, RedirectAttributes redirectAttributes,
-							@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, Model model) {
+							@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, Model model) 
+	{
+		if (userDetailsImpl == null) {
+			redirectAttributes.addFlashAttribute("errorMessage", "ログインしてください。");
+			
+			return "redirect:http://localhost/login";
+		}
+		
 		Optional<Restaurant> optionalRestaurant = restaurantService.findRestaurantById(restaurantId);
 		
 		if (optionalRestaurant.isEmpty()) {
@@ -110,12 +125,10 @@ public class ReviewController {
 						@ModelAttribute @Validated ReviewRegisterForm reviewRegisterForm, BindingResult bindingResult,
 						RedirectAttributes redirectAttributes, Model model,
 						@AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
-		Optional<Restaurant> optionalRestaurant = restaurantService.findRestaurantById(restaurantId);
-		
-		if (optionalRestaurant.isEmpty()) {
-			redirectAttributes.addFlashAttribute("errorMessage", "店舗が存在しません。");
+		if (userDetailsImpl == null) {
+			redirectAttributes.addFlashAttribute("errorMessage", "ログインしてください。");
 			
-			return "redirect:/restaurants";
+			return "redirect:http://localhost/login";
 		}
 		
 		User user = userDetailsImpl.getUser();
@@ -126,13 +139,21 @@ public class ReviewController {
 			return "redirect:/subscription/register";
 		}
 		
+		Optional<Restaurant> optionalRestaurant = restaurantService.findRestaurantById(restaurantId);
+		
+		if (optionalRestaurant.isEmpty()) {
+			redirectAttributes.addFlashAttribute("errorMessage", "店舗が存在しません。");
+			
+			return "redirect:/restaurants";
+		}
+		
 		Restaurant restaurant = optionalRestaurant.get();
 		
 		if (bindingResult.hasErrors()) {
-			redirectAttributes.addFlashAttribute("restaurant", restaurant);
-			redirectAttributes.addFlashAttribute("reviewRegisterForm", reviewRegisterForm);
+			model.addAttribute("restaurant", restaurant);
+			model.addAttribute("reviewRegisterForm", reviewRegisterForm);
 			
-			return "redirect:/restaurants";
+			return "reviews/register";
 		}
 		
 		reviewService.createReview(reviewRegisterForm, restaurant, user);
@@ -147,6 +168,12 @@ public class ReviewController {
 						@PathVariable(name = "reviewId") Integer reviewId, RedirectAttributes redirectAttributes,
 						@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, Model model) 
 	{
+		if (userDetailsImpl == null) {
+			redirectAttributes.addFlashAttribute("errorMessage", "ログインしてください。");
+			
+			return "redirect:http://localhost/login";
+		}
+		
 		User user = userDetailsImpl.getUser();
 	
 		if (user.getRole().getName().equals("ROLE_FREE_MEMBER")) {
@@ -158,7 +185,7 @@ public class ReviewController {
 		Optional<Restaurant> optionalRestaurant = restaurantService.findRestaurantById(restaurantId);
 		Optional<Review> optionalReview = reviewService.findReviewById(reviewId);
 		
-		if (optionalRestaurant.isEmpty() && optionalReview.isEmpty()) {
+		if (optionalRestaurant.isEmpty() || optionalReview.isEmpty()) {
 			redirectAttributes.addFlashAttribute("errorMessage", "指定されたページが見つかりません。");
 		
 			return "redirect:/restaurants";
@@ -184,10 +211,11 @@ public class ReviewController {
 	
 	//フォームから送信されたレビューでデータベースに更新する
 	@PostMapping("/{reviewId}/update")
-	public String update(@PathVariable(name = "restauarntId") Integer restaurantId,
+	public String update(@PathVariable(name = "restaurantId") Integer restaurantId,
 						@PathVariable(name = "reviewId") Integer reviewId, RedirectAttributes redirectAttributes,
-						@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, BindingResult bindingResult,
-						@ModelAttribute @Validated ReviewEditForm reviewEditForm) 
+						@AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
+						@ModelAttribute @Validated ReviewEditForm reviewEditForm, BindingResult bindingResult,
+						Model model) 
 	{
 		Optional<Restaurant> optionalRestaurant = restaurantService.findRestaurantById(restaurantId);
 		Optional<Review> optionalReview = reviewService.findReviewById(reviewId);
@@ -200,7 +228,7 @@ public class ReviewController {
 			return "redirect:/subscription/register";
 		}
 		
-		if (optionalRestaurant.isEmpty() && optionalReview.isEmpty()) {
+		if (optionalRestaurant.isEmpty() || optionalReview.isEmpty()) {
 			redirectAttributes.addFlashAttribute("指定されたページが見つかりません。");
 			
 			return "redirect:/restaurants";
@@ -216,11 +244,11 @@ public class ReviewController {
 		}
 		
 		if (bindingResult.hasErrors()) {
-			redirectAttributes.addFlashAttribute("restaurant", restaurant);
-			redirectAttributes.addFlashAttribute("review", review);
-			redirectAttributes.addFlashAttribute("reviewEditForm", reviewEditForm);
+			model.addAttribute("restaurant", restaurant);
+			model.addAttribute("review", review);
+			model.addAttribute("reviewEditForm", reviewEditForm);
 			
-			return "redirect:/restaurants";
+			return "reviews/edit";
 		}
 		
 		reviewService.updateReview(reviewEditForm, review);
@@ -230,6 +258,7 @@ public class ReviewController {
 	}
 	
 	//レビューをデータベースから削除する
+	@PostMapping("/{reviewId}/delete")
 	public String delete(@PathVariable(name = "restaurantId") Integer restaurantId,
 						@PathVariable(name = "reviewId") Integer reviewId, RedirectAttributes redirectAttributes,
 						@AuthenticationPrincipal UserDetailsImpl userDetailsImpl) 
@@ -245,7 +274,7 @@ public class ReviewController {
 			return "redirect:/restaurants";
 		}
 		
-		if (optionalRestaurant.isEmpty() && optionalReview.isEmpty()) {
+		if (optionalRestaurant.isEmpty() || optionalReview.isEmpty()) {
 			redirectAttributes.addFlashAttribute("errorMessage", "指定されたページが見つかりません。");
 			
 			return "redirect:/restaurants";
