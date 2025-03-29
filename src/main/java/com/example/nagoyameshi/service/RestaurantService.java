@@ -236,4 +236,33 @@ public class RestaurantService {
 		public Page<Restaurant> findRestaurantByLowestPriceLessThanEqualOrderByAverageScoreDesc(Integer price, Pageable pageable) {
 			return restaurantRepository.findByLowestPriceLessThanEqualOrderByAverageScoreDesc(price, pageable);
 		}
+		
+		//すべての店舗を予約数が多い順に並べ替え、ページングされた状態で取得する
+		public Page<Restaurant> findAllRestaurantByOrderByReservationCountDesc(Pageable pageable) {
+			return restaurantRepository.findAllByOrderByReservationCountDesc(pageable);
+		}
+		
+		//指定されたキーワードを店舗名または住所またはカテゴリ名に含む店舗を予約数が多い順に並べ替え、ページングされた状態で取得する
+		public Page<Restaurant> findRestaurantByNameLikeOrAddressLikeOrCategoryNameLikeOrderByReservationCountDesc(String nameKeyword, 
+																													String addressKeyword, 
+																													String categoryNameKeyword,
+																													Pageable pageable) 
+		{
+			return restaurantRepository.findByNameLikeOrAddressLikeOrCategoryNameLikeOrderByReservationCountDesc(nameKeyword, addressKeyword, categoryNameKeyword, pageable);
+		}
+		
+		//指定されたidのカテゴリが設定された店舗を予約数が多い順に並べ替え、ページングされた状態で取得する
+		public Page<Restaurant> findRestaurantByCategoryIdOrderByReservationCountDesc(Integer categoryId, Pageable pageable) {
+			return restaurantRepository.findByCategoryIdOrderByReservationCountDesc(categoryId, pageable);
+		}
+		
+		//指定された最低価格以下の店舗を予約数が多い順に並べ替え、ページングされた状態で取得する
+		public Page<Restaurant> findRestaurantByLowestPriceLessThanEqualOrderByReservationCountDesc(Integer price, Pageable pageable) {
+			return restaurantRepository.findByLowestPriceLessThanEqualOrderByReservationCountDesc(price, pageable);
+		}
+		
+		//指定された店舗の定休日のday_indexフィールドの値をリストで取得する
+		public List<Integer> findDayIndexesByRestaurantId(Integer restaurantId) {
+			return restaurantRepository.findDayIndexesByRestaurantId(restaurantId);
+		}
 }

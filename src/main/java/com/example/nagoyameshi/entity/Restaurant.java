@@ -22,7 +22,7 @@ import lombok.ToString;
 @Entity
 @Table(name = "restaurants")
 @Data
-@ToString(exclude = {"categoriesRestaurants", "regularHolidaysRestaurants", "reviews"})
+@ToString(exclude = {"categoriesRestaurants", "regularHolidaysRestaurants", "reviews", "reservations"})
 public class Restaurant {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -78,6 +78,10 @@ public class Restaurant {
 	//Restaurantエンティティが削除されると、関連する中間テーブルReviewエンティティを削除する
 	@OneToMany(mappedBy = "restaurant", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
 	private List<Review> reviews;
+	
+	//Restaurantエンティティを削除されると、関連する中間テーブルReservationエンティティを削除する
+	@OneToMany(mappedBy = "restaurant", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+	private List<Reservation> reservations;
 	
 	//平均評価を取得する
 	@Transient

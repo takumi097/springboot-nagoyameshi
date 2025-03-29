@@ -1,5 +1,7 @@
 package com.example.nagoyameshi.repository;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -98,6 +100,50 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Integer>
 	           "WHERE r.lowestPrice <= :price " +
 	           "GROUP BY r.id " +
 	           "ORDER BY AVG(rev.score) DESC")
-	    public Page<Restaurant> findByLowestPriceLessThanEqualOrderByAverageScoreDesc(@Param("price") Integer price, Pageable pageable);    
+	    public Page<Restaurant> findByLowestPriceLessThanEqualOrderByAverageScoreDesc(@Param("price") Integer price, Pageable pageable);
 	
+	//すべての店舗を予約数が多い順に並べ替えページング絵された状態で取得
+	@Query("SELECT r FROM Restaurant r " +
+			"LEFT JOIN r.reservations rv " +
+			"GROUP BY r.id " +
+			"ORDER BY COUNT(rv) DESC")
+	public Page<Restaurant> findAllByOrderByReservationCountDesc(Pageable pageable);
+	
+	//指定されたキーワードを店舗名または住所またはカテゴリ名に含み店舗を予約数が多い順に並べ替え、ページングされた状態で取得する
+	@Query("SELECT r FROM Restaurant r " +
+			"LEFT JOIN r.categoriesRestaurants cr" +
+			"LEDT JOIN r.reservations rv " +
+			"WHERE r.name LIKE %:name% " +
+			"OR r.address LIKE %:address% " +
+			"OR cr.category.name LIKE %:categoryName% " +
+			"GROUP BY r.id " +
+			"ORDER BY COUNT(DISTINCT rv.id) DESC")
+	public Page<Restaurant> findByNameLikeOrAddressLikeOrCategoryNameLikeOrderByReservationCountDesc(@Param("name") String nameKeyword,
+																								@Param("address") String addressKeyword,
+																								@Param("categoryName") String categoryNameKeyword,
+																								Pageable pageable);
+	
+	//指定されたidのカテゴリが設定された店舗を予約数が多い順に並べ替え、ページングされた状態で取得する
+	@Query("SELECT r FROM Restaurant r " +
+			"INNER JOIN r.categoriesRestaurants cr " +
+			"LEFT JOIN r.reservation rv " +
+			"WHERE cr.category.id = :categoryId " +
+			"GROUP BY r.id " +
+			"ORDER BY COUNT(rv) DESC")
+	public Page<Restaurant> findByCategoryIdOrderByReservationCountDesc(@Param("categoryId") Integer categoryId, Pageable pageable);
+	
+	//指定された最低価格の店舗を予約数が多い順に並べ替え、ページングされた状態で取得する
+	@Query("SELECT r FROM Restaurant r " +
+			"LEFT JOIN r.reservations rv " +
+			"WHERE r.lowestPrice <= :price " +
+			"GROUP BY r.id " +
+			"ORDER BY COUNT(rv) DESC")
+	public Page<Restaurant> findByLowestPriceLessThanEqualOrderByReservationCountDesc(@Param("price") Integer price, Pageable pageable);
+	
+	//指定された店舗の定休日のday_indexフィールドの値をリストで取得する
+	@Query("SELECT rh.dayIndex FROM RegularHoliday rh " +
+			"INNER JOIN rh.regularHolidaysRestaurants rhr " +
+			"INNER JOIN rhr.restaurant r " +
+			"WHERE r.id = :restaurantId")
+	public List<Integer> findDayIndexesByRestaurantId(@Param("restaurantId") Integer restaurantId);
 }

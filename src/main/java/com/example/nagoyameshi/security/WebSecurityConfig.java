@@ -20,15 +20,15 @@ public class WebSecurityConfig {
 					//すべてのユーザーにアクセスを許可する
 					.requestMatchers("/css/**", "/images/**", "/js/**", "/storage/**", "/", "/signup/**").permitAll()
 					 // 管理者にのみアクセスを許可するURL
-					.requestMatchers("/admin/**").hasRole("ADMIN") 
+					.requestMatchers("/admin/**").hasRole("ADMIN")
+					//無料会員、有料会員のみアクセス許可URL
+					.requestMatchers("/restaurants/{restaurantId}/reviews/**").hasAnyRole("FREE_MEMBER", "PAID_MEMBER")
 					//未ログインユーザー、無料会員、有料会員がアクセスを許可URL
 					.requestMatchers("/restaurants/**").hasAnyRole("ANONYMOUS", "FREE_MEMBER", "PAID_MEMBER")
 					//無料会員のみアクセスを許可するURL
 					.requestMatchers("/subscription/register", "/subscription/create").hasRole("FREE_MEMBER")
 					//有料会員のみアクセス許可するURL
 					.requestMatchers("/subscription/edit", "/subscription/update", "/subscription/cancel", "/subscription/delete").hasRole("PAID_MEMBER")
-					//無料会員、有料会員のみアクセス許可URL
-					.requestMatchers("/restaurants/{restaurantId}/reviews/**").hasAnyRole("FREE_MEMBER", "PAID_MEMBER")
 					//上記以外のURLはログインが必要（会員または管理者のどちらでもOK）
 					.anyRequest().authenticated()
 					)
